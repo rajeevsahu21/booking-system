@@ -1,0 +1,20 @@
+{
+  "name": "booking-service",
+  "version": "1.0.0",
+  "description": "Booking service for seat booking",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "author": "Rajeev Sahu",
+  "license": "ISC",
+  "dependencies": {
+    "csv-parse": "^5.4.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongoose": "^7.3.1",
+    "multer": "^1.4.5-lts.1"
+  }
+}
