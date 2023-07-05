@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 const bookingSchema = new mongoose.Schema({
   name: String,
   email: String,
-  phone: Number,
-  seatId: [
+  phone: String,
+  amount: Number,
+  seatIds: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Seat",
+      type: Number,
     },
   ],
 });

@@ -60,21 +60,17 @@ const getAllSeats = async (req, res) => {
 const getSeat = async (req, res) => {
   try {
     const { id } = req.params;
-    const seat = await Seat.findOne({ id }, { _id: 0, __v: 0 });
+    const seat = await Seat.findOne({ id }, { _id: 0, __v: 0 }).lean();
     if (!seat) {
       return res.status(404).json({ error: "Seat not found" });
     }
-    const totalSeatOfThisClass = await Seat.countDocuments({
-      seat_class: seat.seat_class,
-    });
-    const totalBookedSeatOfThisClass = await Booking.find({});
-    console.log(totalSeatOfThisClass);
+    const price = await getPrice(seat.seat_class);
     res.status(200).json({
       error: false,
-      data: seat,
+      data: { ...seat, price },
       message: "Seat found successfully",
     });
-  } catch (error) {
+  } catch (err) {
     console.error(err);
     res
       .status(500)
@@ -82,4 +78,33 @@ const getSeat = async (req, res) => {
   }
 };
 
-export { addSeatData, addSeatPriceData, getAllSeats, getSeat };
+export { addSeatData, addSeatPriceData, getAllSeats, getSeat, getPrice };
+
+const getPrice = async (seat_class) => {
+  try {
+    const totalSeatOfThisClass = await Seat.countDocuments({ seat_class });
+    const totalBookedSeatOfThisClass = await Seat.countDocuments({
+      seat_class,
+      is_booked: true,
+    });
+    let price;
+    let percentage = (totalBookedSeatOfThisClass / totalSeatOfThisClass) * 100;
+    const seatPrice = await SeatPrice.findOne({ seat_class });
+    if (percentage < 40) {
+      price = seatPrice.min_price
+        ? seatPrice.min_price
+        : seatPrice.normal_price;
+    } else if (percentage > 60) {
+      price = seatPrice.max_price
+        ? seatPrice.max_price
+        : seatPrice.normal_price;
+    } else {
+      price = seatPrice.normal_price
+        ? seatPrice.normal_price
+        : seatPrice.max_price;
+    }
+    return price;
+  } catch (err) {
+    console.error(err);
+  }
+};
